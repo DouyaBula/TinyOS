@@ -83,13 +83,11 @@ void *memcpy(void *out, const void *in, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
-	if (n == 0) {
-		return 0;
-	} else {
-		while (n-- && *(char*)s1 == *(char*)s2) {
-			s1 = (char*)s1 + 1;
-			s2 = (char*)s2 + 1;
-		}
-		return (*((unsigned char*)s1) - *((unsigned char*)s2));
+	int reval = 0;
+	while(n && !(reval = (*(unsigned char *)s1) - (*(unsigned char *)s2))) {
+		s1 = (unsigned char *)s1 + 1;
+		s2 = (unsigned char *)s2 + 1;
+		n--;
 	}
+	return reval;
 }
