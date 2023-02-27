@@ -4,7 +4,7 @@ size_t strlen(const char *s) {
 	size_t n = 0;
 	while(*s) {
 		n++;
-		str++;
+		s++;
 	}
 	return n;
 }
@@ -44,9 +44,9 @@ char *strcat(char *dst, const char *src) {
 }
 
 int strcmp(const char *s1, const char *s2) {
-	while(*s1 && (*str1 == *str2)) {
-		str1++;
-		str2++;
+	while(*s1 && (*s1 == *s2)) {
+		s1++;
+		s2++;
 	}
 	return *(const unsigned char*) s1 - *(const unsigned char*) s2;
 }
