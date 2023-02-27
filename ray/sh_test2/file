@@ -5,7 +5,8 @@ return 0;}
 #include<stdlib.h>
         cout(Hello OS Lab0);
 return 0;}
-return 0;}
+return 0;
+}
         cout(Hello OS Lab0);
 #include<stdlib.h>
         cout(Hello OS Lab0);

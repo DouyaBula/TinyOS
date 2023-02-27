@@ -5,7 +5,7 @@
 #include<stdlib.h>
 #include<stdlib.h>
 #include<stdlib.h>
-#include<stdio.h>
+<<< LINE 8 >>>
 #include<stdlib.h>
 #include<stdlib.h>
 #include<stdlib.h>
@@ -29,7 +29,7 @@
 #include<stdlib.h>
 #include<stdlib.h>
 #include<stdlib.h>
-int main(){
+<<< LINE 32 >>>
 #include<stdlib.h>
 #include<stdlib.h>
 #include<stdlib.h>
@@ -125,7 +125,7 @@ int main(){
 #include<stdlib.h>
 #include<stdlib.h>
 #include<stdlib.h>
-        printf("This is Test!\n");
+<<< LINE 128 >>>
 #include<stdlib.h>
 #include<stdlib.h>
 #include<stdlib.h>
@@ -509,7 +509,7 @@ int main(){
 #include<stdlib.h>
 #include<stdlib.h>
 #include<stdlib.h>
-        return 0;
+<<< LINE 512 >>>
 int main(void){}
 int main(void){}
 int main(void){}
@@ -1021,7 +1021,7 @@ int main(void){}
 int main(void){}
 int main(void){}
 int main(void){}
-}
+<<< LINE 1024 >>>
         printf("Hello OS Lab0!\n");
         printf("Hello OS Lab0!\n");
         printf("Hello OS Lab0!\n");
