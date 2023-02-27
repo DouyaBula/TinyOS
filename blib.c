@@ -1,11 +1,23 @@
 #include <blib.h>
 
 size_t strlen(const char *s) {
-	panic("please implement");
+	size_t n = 0;
+	while(*s) {
+		n++;
+		str++;
+	}
+	return n;
 }
 
 char *strcpy(char *dst, const char *src) {
-	panic("please implement");
+	char *res = dst;
+	while(*src){
+		*dst = *src;
+		dst++;
+		src++;
+	}
+	*dst = '\0';
+	return res;
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {
@@ -18,11 +30,25 @@ char *strncpy(char *dst, const char *src, size_t n) {
 }
 
 char *strcat(char *dst, const char *src) {
-	panic("please implement");
+	char *res = dst;
+	while(*dst){
+		dst++;
+	}
+	while(*src){
+		*dst = *src;
+		dst++;
+		src++;
+	}
+	*dst = '\0';
+	return res;
 }
 
 int strcmp(const char *s1, const char *s2) {
-	panic("please implement");
+	while(*s1 && (*str1 == *str2)) {
+		str1++;
+		str2++;
+	}
+	return *(const unsigned char*) s1 - *(const unsigned char*) s2;
 }
 
 int strncmp(const char *s1, const char *s2, size_t n) {
@@ -40,7 +66,11 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 }
 
 void *memset(void *s, int c, size_t n) {
-	panic("please implement");
+	unsigned char *p = (unsigned char*) s;
+	while(n--) {
+		*p++ = (unsigned char) c;
+	}
+	return s;
 }
 
 void *memcpy(void *out, const void *in, size_t n) {
@@ -53,5 +83,13 @@ void *memcpy(void *out, const void *in, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
-	panic("please implement");
+	if (n == 0) {
+		return 0;
+	} else {
+		while (n-- && *(char*)s1 == *(char*)s2) {
+			s1 = (char*)s1 + 1;
+			s2 = (char*)s2 + 1;
+		}
+		return (*((unsigned char*)s1) - *((unsigned char*)s2));
+	}
 }
