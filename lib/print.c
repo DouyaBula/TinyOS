@@ -35,11 +35,12 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
         fmt++;
         long_flag = 0;
         neg_flag = 0;
+        width = 0;
         ladjust = 0;
         padc = ' ';
         if(*fmt == '-'){
             ladjust = 1;
-            fmt++:
+            fmt++;
         }
         if(*fmt == '0'){
             padc = '0';
@@ -60,7 +61,6 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
             fmt++;
         }
 
-		neg_flag = 0;
 		switch (*fmt) {
 		case 'b':
 			if (long_flag) {
