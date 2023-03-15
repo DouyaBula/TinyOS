@@ -5,11 +5,11 @@
 
 #define BY2PG 4096		// bytes to a page
 #define PDMAP (4 * 1024 * 1024) // bytes mapped by a page directory entry
-#define PGSHIFT 12
+#define PGSHIFT 12  // log2(BY2PG)
 #define PDSHIFT 22 // log2(PDMAP)
-#define PDX(va) ((((u_long)(va)) >> 22) & 0x03FF)
-#define PTX(va) ((((u_long)(va)) >> 12) & 0x03FF)
-#define PTE_ADDR(pte) ((u_long)(pte) & ~0xFFF)
+#define PDX(va) ((((u_long)(va)) >> 22) & 0x03FF)   // Page Directory indeX
+#define PTX(va) ((((u_long)(va)) >> 12) & 0x03FF)   // Page Table indeX
+#define PTE_ADDR(pte) ((u_long)(pte) & ~0xFFF)  // 31:12
 
 // Page number field of an address
 #define PPN(va) (((u_long)(va)) >> 12)
