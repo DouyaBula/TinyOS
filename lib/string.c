@@ -1,5 +1,33 @@
 #include <types.h>
 
+#include <drivers/dev_cons.h>
+#include <print.h>
+#include <printk.h>
+#include <trap.h>
+
+struct com {
+    int cnt;
+    char *buf;
+};
+void outputS(void *data, const char *put, size_t len) {
+    struct com *ptr = (struct com *)data;
+    int index;
+    for (int i = 0; i < len; i++) {
+        index = (ptr->cnt);
+        (ptr->buf)[index] = put[i];
+        (ptr->cnt) = (ptr->cnt) + 1;
+    }
+}
+int sprintf(char *buf, const char *fmt, ...){
+    struct com _com = {0, buf};
+    va_list ap;
+    va_start(ap, fmt);
+    vprintfmt(outputS, &_com, fmt, ap);
+    va_end(ap);
+    _com.buf[_com.cnt] = '\0';
+    return _com.cnt - 1;
+}
+
 void *memcpy(void *dst, const void *src, size_t n) {
 	void *dstaddr = dst;
 	void *max = dst + n;

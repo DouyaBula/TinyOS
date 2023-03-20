@@ -3,6 +3,7 @@
 #include <kclock.h>
 #include <pmap.h>
 #include <printk.h>
+#include <stdio.h>
 #include <trap.h>
 
 // When build with 'make test lab=?_?', we will replace your 'mips_init' with a generated one from
@@ -13,7 +14,9 @@
 
 void mips_init() {
 	printk("init.c:\tmips_init() is called\n");
-
+    char test[20];
+    sprintf(test, "12345");
+    printk(test);
 	// lab2:
 	// mips_detect_memory();
 	// mips_vm_init();
