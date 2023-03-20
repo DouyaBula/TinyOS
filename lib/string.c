@@ -15,6 +15,8 @@ void outputS(void *data, const char *put, size_t len) {
     for (int i = 0; i < len; i++) {
         index = (ptr->cnt);
         (ptr->buf)[index] = put[i];
+        //DEBUG
+        //printk("cnt:%d, index:%d, char:%c\n", ptr->cnt, index, put[i]);
         (ptr->cnt) = (ptr->cnt) + 1;
     }
 }
@@ -28,7 +30,7 @@ int sprintf(char *buf, const char *fmt, ...){
     if (_com.cnt <= 0) {
         return 0;
     } else {
-        return _com.cnt - 1;
+        return _com.cnt;
     }
 }
 
