@@ -60,8 +60,33 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
             long_flag = 1;
             fmt++;
         }
-
+        long num1;
+        long num2;
+        int neg_flag1 = 0;
+        int neg_flag2 = 0;
 		switch (*fmt) {
+        case 'R':
+            if (long_flag) {
+                num1 = va_arg(ap, long int);
+                num2 = va_arg(ap, long int);
+            } else {
+                num1 = va_arg(ap, int);
+                num2 = va_arg(ap, int);
+            }
+            if (num1 < 0) {
+                neg_flag1 = 1;
+                num1 = -num1;
+            }
+            if (num2 < 0) {
+                neg_flag2 = 1;
+                num2 = -num2;
+            }
+            print_char(out, data, '(', 1, 0);
+            print_num(out, data, num1, 10, neg_flag1, width, ladjust, padc, 0);
+            print_char(out, data, ',', 1, 0);
+            print_num(out, data, num2, 10, neg_flag2, width, ladjust, padc, 0);
+            print_char(out, data, ')', 1, 0);
+            break;
 		case 'b':
 			if (long_flag) {
 				num = va_arg(ap, long int);
