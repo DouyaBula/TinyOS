@@ -25,7 +25,11 @@ int sprintf(char *buf, const char *fmt, ...){
     vprintfmt(outputS, &_com, fmt, ap);
     va_end(ap);
     _com.buf[_com.cnt] = '\0';
-    return _com.cnt - 1;
+    if (_com.cnt <= 0) {
+        return 0;
+    } else {
+        return _com.cnt - 1;
+    }
 }
 
 void *memcpy(void *dst, const void *src, size_t n) {
