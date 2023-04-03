@@ -538,13 +538,33 @@ void swap_init() {
 	}
 }
 
+
+void *da;
 // Interface for 'Passive Swap Out'
 struct Page *swap_alloc(Pde *pgdir, u_int asid) {
 	// Step 1: Ensure free page
 	if (LIST_EMPTY(&page_free_swapable_list)) {
 		/* Your Code Here (1/3) */
         struct Page *pp = pa2page(SWAP_PAGE_BASE);
-        u_long da = (u_long)disk_alloc();
+        da = disk_alloc();
+        for (int i = 0; i < 1024; ++i) {
+            Pde *pdEntry = pgdir + i;
+            if ((*pdEntry) & PTE_V) {
+                Pte *pgTbl = (Pte *)KADDR(PTE_ADDR(*pdEntry));
+                for (int j = 0; j < 1024; ++j) {
+                    Pte *ptEntry = pgTbl + j;
+                    if ((*ptEntry) & PTE_V) {
+                        if (PTE_ADDR(*ptEntry) == page2pa(pp)) {
+                            *ptEntry = PTE_ADDR(da) | (((*ptEntry)&0xFFF) & (~PTE_V) | PTE_SWP);
+                            tlb_invalidate(asid, KADDR(PTE_ADDR(*ptEntry)));
+                        }
+                    }
+                }
+            }
+        }
+        memcpy(da, (void *)pp, BY2PG);
+        LIST_INSERT_HEAD(&page_free_swapable_list, pp, pp_link);
+        return pp;
 	}
 
 	// Step 2: Get a free page and clear it
@@ -558,10 +578,37 @@ struct Page *swap_alloc(Pde *pgdir, u_int asid) {
 // Interfaces for 'Active Swap In'
 static int is_swapped(Pde *pgdir, u_long va) {
 	/* Your Code Here (2/3) */
+    Pte **ppte;
+    pgdir_walk(pgdir, va, 0, ppte);
+    if (*ppte != NULL) {
+        if (**ppte & PTE_SWP) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 static void swap(Pde *pgdir, u_int asid, u_long va) {
 	/* Your Code Here (3/3) */
+    struct Page *pp;
+    pp = swap_alloc(pgdir, asid);
+    memcpy((void *)pp, da, BY2PG);
+        for (int i = 0; i < 1024; ++i) {
+            Pde *pdEntry = pgdir + i;
+            if ((*pdEntry) & PTE_V) {
+                Pte *pgTbl = (Pte *)KADDR(PTE_ADDR(*pdEntry));
+                for (int j = 0; j < 1024; ++j) {
+                    Pte *ptEntry = pgTbl + j;
+                    if ((*ptEntry) & PTE_SWP) {
+                        if (PTE_ADDR(*ptEntry) == page2pa(da)) {
+                            *ptEntry = PTE_ADDR(pp) | (((*ptEntry)&0xFFF) | (PTE_V) & ~PTE_SWP);
+                            tlb_invalidate(asid, KADDR(PTE_ADDR(*ptEntry)));
+                        }
+                    }
+                }
+            }
+        }
+    disk_free((u_char *)da);
 }
 
 Pte swap_lookup(Pde *pgdir, u_int asid, u_long va) {
