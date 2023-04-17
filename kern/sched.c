@@ -18,41 +18,48 @@
 void schedule(int yield) {
 	static int count = 0; // remaining time slices of current env
 	struct Env *e = curenv;
-
-	/* We always decrease the 'count' by 1.
-	 *
-	 * If 'yield' is set, or 'count' has been decreased to 0, or 'e' (previous 'curenv') is
-	 * 'NULL', or 'e' is not runnable, then we pick up a new env from 'env_sched_list' (list of
-	 * all runnable envs), set 'count' to its priority, and schedule it with 'env_run'. **Panic
-	 * if that list is empty**.
-	 *
-	 * (Note that if 'e' is still a runnable env, we should move it to the tail of
-	 * 'env_sched_list' before picking up another env from its head, or we will schedule the
-	 * head env repeatedly.)
-	 *
-	 * Otherwise, we simply schedule 'e' again.
-	 *
-	 * You may want to use macros below:
-	 *   'TAILQ_FIRST', 'TAILQ_REMOVE', 'TAILQ_INSERT_TAIL'
-	 */
-	/* Exercise 3.12: Your code here. */
-    #define DEBUG 0
+    static int user_time[5];
+    
+    int user_ok[5];
+    for (int k = 0; k < 5; k++) {
+        user_ok[k] = 0;
+    }
+    struct Env *temp;
+    TAILQ_FOREACH(temp, &env_sched_list, env_sched_link) {
+        user_ok[temp->env_user] = 1;
+    }
+    
+    // #define DEBUG 0
     if (yield != 0 || count == 0 || e == NULL || e->env_status != ENV_RUNNABLE) {
         if (e != NULL && e->env_status == ENV_RUNNABLE) {
+            TAILQ_REMOVE(&env_sched_list, e, env_sched_link);
             TAILQ_INSERT_TAIL(&env_sched_list, e, env_sched_link);
+            user_time[e->env_user] += e->env_pri;
         }
+
         if (TAILQ_EMPTY(&env_sched_list)) {
             panic("schedule: no runnable envs");
         }
-        e = TAILQ_FIRST(&env_sched_list);
-        if (DEBUG) {
-            if (e->env_status == ENV_RUNNABLE) {
-                printk(">>> It is runnable.\n");
-            } else {
-                printk(">>> It is NOT runnable!\n");
+        
+        int minUser = -1;
+        for (int t = 0; t < 5; t++) {
+            if (user_ok[t]) {
+                if (minUser == -1) {
+                    minUser = t;
+                    continue;
+                }
+                if (user_time[t] < user_time[minUser]) {
+                    minUser = t;
+                }
             }
-        }    
-        TAILQ_REMOVE(&env_sched_list, e, env_sched_link);
+        }
+
+        TAILQ_FOREACH(e, &env_sched_list, env_sched_link) {
+            if (e->env_user == minUser) {
+                break;
+            }
+        }
+
         count = e->env_pri;
     }
     count--;
