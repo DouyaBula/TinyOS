@@ -14,20 +14,18 @@
 void mips_init() {
 	printk("init.c:\tmips_init() is called\n");
 	// lab2:
-	// mips_detect_memory();
-	// mips_vm_init();
-	// page_init();
+	mips_detect_memory();
+	mips_vm_init();
+	page_init();
 
 	// lab3:
-	// env_init();
-    ENV_CREATE_PRIORITY(user_bare_loop, 1);
-    ENV_CREATE_PRIORITY(user_bare_loop, 2);
-	// lab3:
-	// ENV_CREATE_PRIORITY(user_bare_loop, 1);
-	// ENV_CREATE_PRIORITY(user_bare_loop, 2);
-
-	// lab4:
-	// ENV_CREATE(user_tltest);
+	env_init();
+    // ENV_CREATE_PRIORITY(user_bare_loop, 1);
+    // ENV_CREATE_PRIORITY(user_bare_loop, 2);
+	
+    // lab4
+    envid2env_check();
+	ENV_CREATE(user_tltest);
 	// ENV_CREATE(user_fktest);
 	// ENV_CREATE(user_pingpong);
 
