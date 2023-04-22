@@ -85,7 +85,7 @@ static void duppage(u_int envid, u_int vpn) {
 	/* Exercise 4.10: Your code here. (2/2) */
     int flag = 0;
     if ((perm & PTE_D) && !(perm & PTE_LIBRARY) && !(perm & PTE_COW)) {
-        flag =1;
+        flag = 1;
         perm = (perm - PTE_D) | PTE_COW;
     }
     syscall_mem_map(0, (void *)addr, envid, (void *)addr, perm);
@@ -128,7 +128,9 @@ int fork(void) {
 	// Hint: You should use 'duppage'.
 	/* Exercise 4.15: Your code here. (1/2) */
     for (i = 0; i < VPN(USTACKTOP); i++) {
-        duppage(child, i);
+        if (((*(vpd + (i >> 10))) & PTE_V) && ((*(vpt + i)) & PTE_V)) {
+            duppage(child, i);
+        }
     }
 	/* Step 4: Set up the child's tlb mod handler and set child's 'env_status' to
 	 * 'ENV_RUNNABLE'. */
