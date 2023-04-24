@@ -11,6 +11,73 @@
 extern struct Env *curenv;
 
 /* Overview:
+ *   Check 'va' is illegal or not, according to include/mmu.h
+ */
+static inline int is_illegal_va(u_long va) {
+	return va < UTEMP || va >= UTOP;
+}
+
+
+// lab4-1 exam
+void sys_set_gid(u_int gid) {
+    curenv->env_gid = gid;
+}
+
+int sys_ipc_try_group_send(u_int envid, u_int value, u_int srcva, u_int perm) {
+    struct Env *e;
+	struct Page *pp;
+
+	/* Step 1: Check if 'srcva' is either zero or a legal address. */
+	/* Exercise 4.8: Your code here. (4/8) */
+    if (srcva != 0 && is_illegal_va(srcva)) {
+        return -E_INVAL;
+    }
+	/* Step 2: Convert 'envid' to 'struct Env *e'. */
+	/* This is the only syscall where the 'envid2env' should be used with 'checkperm' UNSET,
+	 * because the target env is not restricted to 'curenv''s children. */
+	/* Exercise 4.8: Your code here. (5/8) */
+    try(envid2env(envid, &e, 0));
+	/* Step 3: Check if the target is waiting for a message. */
+	/* Exercise 4.8: Your code here. (6/8) */
+    if (e->env_ipc_recving == 0) {
+        return -E_IPC_NOT_RECV;
+    }
+
+    // lab4-1 exam
+    if (e->env_gid != curenv->env_gid) {
+        return -E_IPC_NOT_GROUP;
+    }
+
+	/* Step 4: Set the target's ipc fields. */
+	e->env_ipc_value = value;
+	e->env_ipc_from = curenv->env_id;
+	e->env_ipc_perm = PTE_V | perm;
+	e->env_ipc_recving = 0;
+
+	/* Step 5: Set the target's status to 'ENV_RUNNABLE' again and insert it to the tail of
+	 * 'env_sched_list'. */
+	/* Exercise 4.8: Your code here. (7/8) */
+    e->env_status = ENV_RUNNABLE;
+    TAILQ_INSERT_TAIL(&env_sched_list, e, env_sched_link);
+	/* Step 6: If 'srcva' is not zero, map the page at 'srcva' in 'curenv' to 'e->env_ipc_dstva'
+	 * in 'e'. */
+	/* Return -E_INVAL if 'srcva' is not zero and not mapped in 'curenv'. */
+	if (srcva != 0) {
+		/* Exercise 4.8: Your code here. (8/8) */
+        if (is_illegal_va(e->env_ipc_dstva)) {
+            return -E_INVAL;
+        }
+        Pte *ppte;
+        pp = page_lookup(curenv->env_pgdir, srcva, &ppte);
+        if (pp == NULL) {
+            return -E_INVAL;
+        }
+        try(page_insert(e->env_pgdir, e->env_asid, pp, e->env_ipc_dstva, perm));
+	}
+	return 0;
+}
+
+/* Overview:
  * 	This function is used to print a character on screen.
  *
  * Pre-Condition:
@@ -105,12 +172,7 @@ int sys_set_tlb_mod_entry(u_int envid, u_int func) {
 	return 0;
 }
 
-/* Overview:
- *   Check 'va' is illegal or not, according to include/mmu.h
- */
-static inline int is_illegal_va(u_long va) {
-	return va < UTEMP || va >= UTOP;
-}
+
 
 static inline int is_illegal_va_range(u_long va, u_int len) {
 	if (len == 0) {
@@ -498,6 +560,8 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+    [SYS_set_gid] = sys_set_gid,
+    [SYS_ipc_try_group_send] = sys_ipc_try_group_send,
 };
 
 /* Overview:

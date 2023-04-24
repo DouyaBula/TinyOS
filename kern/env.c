@@ -267,6 +267,8 @@ int env_alloc(struct Env **new, u_int parent_id) {
 	 *   Use 'asid_alloc' to allocate a free asid.
 	 *   Use 'mkenvid' to allocate a free envid.
 	 */
+    // lab4-1 exam
+    e->env_gid = 0;
 	e->env_user_tlb_mod_entry = 0; // for lab4
 	e->env_runs = 0;	       // for lab6
 	/* Exercise 3.4: Your code here. (3/4) */

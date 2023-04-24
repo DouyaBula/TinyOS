@@ -43,6 +43,12 @@ int spawn(char *prog, char **argv);
 int spawnl(char *prot, char *args, ...);
 int fork(void);
 
+// lab4-1 exam
+void set_gid(u_int gid);
+int ipc_group_send(u_int whom, u_int val, const void *srcva, u_int perm);
+void syscall_set_gid(u_int gid);
+int syscall_ipc_try_group_send(u_int whom, u_int val, const void *srcva, u_int perm);
+
 /// syscalls
 extern int msyscall(int, ...);
 
