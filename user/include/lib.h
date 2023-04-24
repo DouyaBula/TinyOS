@@ -13,6 +13,10 @@
 #define envs ((volatile struct Env *)UENVS)
 #define pages ((volatile struct Page *)UPAGES)
 
+// lab4-1 extra
+int ipc_broadcast(u_int val, void * srcva, u_int perm);
+int syscall_ipc_try_broadcast(u_int val, const void *srcva, u_int perm);
+
 // libos
 void exit(void) __attribute__((noreturn));
 

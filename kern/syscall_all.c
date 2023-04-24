@@ -374,6 +374,70 @@ int sys_ipc_recv(u_int dstva) {
  *   'sys_ipc_recv'.
  *   Return the original error when underlying calls fail.
  */
+extern struct Env envs[];
+int sub_sys_ipc_try_broadcast(u_int root, u_int value, u_int srcva, u_int perm) {
+	struct Env *e;
+	struct Page *pp;
+
+	/* Step 1: Check if 'srcva' is either zero or a legal address. */
+	/* Exercise 4.8: Your code here. (4/8) */
+    if (srcva != 0 && is_illegal_va(srcva)) {
+        return -E_INVAL;
+    }
+	/* Step 2: Convert 'envid' to 'struct Env *e'. */
+	/* This is the only syscall where the 'envid2env' should be used with 'checkperm' UNSET,
+	 * because the target env is not restricted to 'curenv''s children. */
+	/* Exercise 4.8: Your code here. (5/8) */
+    for(int i = 0; i < NENV; i++) {
+        // printk(">> 1 !!\n");
+        e = envs + i;
+        // printk(">> 2 !!\n");
+        if(e->env_status == ENV_FREE) {
+            continue;
+        }
+	/* Step 3: Check if the target is waiting for a message. */
+	/* Exercise 4.8: Your code here. (6/8) */
+    if (e->env_parent_id != root) {
+        continue;
+    }
+    if (e->env_ipc_recving == 0) {
+        return -E_IPC_NOT_RECV;
+    }
+	/* Step 4: Set the target's ipc fields. */
+	e->env_ipc_value = value;
+	e->env_ipc_from = curenv->env_id;
+	e->env_ipc_perm = PTE_V | perm;
+	e->env_ipc_recving = 0;
+
+	/* Step 5: Set the target's status to 'ENV_RUNNABLE' again and insert it to the tail of
+	 * 'env_sched_list'. */
+	/* Exercise 4.8: Your code here. (7/8) */
+    e->env_status = ENV_RUNNABLE;
+    TAILQ_INSERT_TAIL(&env_sched_list, e, env_sched_link);
+	/* Step 6: If 'srcva' is not zero, map the page at 'srcva' in 'curenv' to 'e->env_ipc_dstva'
+	 * in 'e'. */
+	/* Return -E_INVAL if 'srcva' is not zero and not mapped in 'curenv'. */
+	if (srcva != 0) {
+		/* Exercise 4.8: Your code here. (8/8) */
+        if (is_illegal_va(e->env_ipc_dstva)) {
+            return -E_INVAL;
+        }
+        Pte *ppte;
+        pp = page_lookup(curenv->env_pgdir, srcva, &ppte);
+        if (pp == NULL) {
+            return -E_INVAL;
+        }
+        try(page_insert(e->env_pgdir, e->env_asid, pp, e->env_ipc_dstva, perm));
+	}
+    try(sub_sys_ipc_try_broadcast(e->env_id, value, srcva, perm));
+    }
+	return 0;
+
+}
+int sys_ipc_try_broadcast(u_int value, u_int srcva, u_int perm) {
+    try(sub_sys_ipc_try_broadcast(curenv->env_id, value, srcva, perm));
+    return 0;
+}
 int sys_ipc_try_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 	struct Env *e;
 	struct Page *pp;
@@ -498,6 +562,7 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+    [SYS_ipc_try_broadcast] = sys_ipc_try_broadcast,
 };
 
 /* Overview:
