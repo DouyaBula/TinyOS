@@ -29,10 +29,13 @@ int main() {
 		}
 	}
 	debugf("end of devtst\n");
-
+    
+    debugf("<<< 111_reached here\n");
 	if (syscall_read_dev(&c, 0x0fffffff, 1) != -3) {
+        debugf(">>> 222_reached here.\n");
 		user_panic("failed dev address test");
 	}
+    debugf("<>< 333_reached here.\n");
 	if (syscall_read_dev(&c, 0x10000020, 1) != -3) {
 		user_panic("failed dev address test");
 	}
