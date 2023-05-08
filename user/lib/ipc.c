@@ -3,7 +3,34 @@
 #include <env.h>
 #include <lib.h>
 #include <mmu.h>
+#include <syscall.h>
 
+
+int sem_init(const char *name, int init_value, int checkperm) {
+    return msyscall(SYS_init, name, init_value, checkperm);
+}
+int sem_wait(int sem_id) {
+    int r;
+    r = msyscall(SYS_wait, sem_id, 1);
+    if (r == -E_NO_SEM) {
+        return r;
+    }
+    if (r == -1) {
+        while((r=msyscall(SYS_wait, sem_id, 0) == -1)){
+            syscall_yield();
+        }
+    }
+    return 0;
+}
+int sem_post(int sem_id) {
+    return msyscall(SYS_post, sem_id);
+}
+int sem_getvalue(int sem_id) {
+    return msyscall(SYS_getvalue, sem_id);
+}
+int sem_getid(const char *name) {
+    return msyscall(SYS_getid, name);
+}
 // Send val to whom.  This function keeps trying until
 // it succeeds.  It should panic() on any error other than
 // -E_IPC_NOT_RECV.

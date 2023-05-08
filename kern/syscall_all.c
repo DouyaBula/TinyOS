@@ -10,6 +10,138 @@
 
 extern struct Env *curenv;
 
+int total=0;
+int value[11];
+const char *nameee[11];
+int perm[11];
+int posA[11];
+int posB[11];
+int queue[11][100];
+int canRelease[11];
+int root[11];
+int sys_init(const char *name, int init_value, int checkperm) {
+    if(total==10){
+        return -E_NO_SEM;
+    }
+    int sem_id = total;
+    root[total] = curenv->env_id;
+    nameee[total] = name;
+    value[total] = init_value;
+    perm[total]=checkperm;
+    ++total;
+    return sem_id;
+}
+
+int sys_wait(int sem_id, int type) {
+    if(type == 1){
+        if(perm[sem_id]!=0){
+            int enviddd=curenv->env_id;
+            int flag=0;
+            while(enviddd!=0){
+                if(enviddd==root[sem_id]){
+                    flag=1;
+                    break;
+                }
+                struct Env *t;
+                envid2env(enviddd, &t, 0);
+                enviddd=t->env_parent_id;
+            }
+            if(flag!=1){
+                return -E_NO_SEM;
+            }
+        }
+        value[sem_id]--;
+        if (value<0){
+            queue[sem_id][posB[sem_id]]=curenv->env_id;
+            posB[sem_id]++;
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+    if (canRelease[sem_id]>0&&queue[sem_id][posA[sem_id]]==curenv->env_id){
+        canRelease[sem_id]--;
+        posA[sem_id]++;
+        return 0;
+    }
+    return -1;
+}
+
+int sys_post(int sem_id) {
+        if(perm[sem_id]!=0){
+            int enviddd=curenv->env_id;
+            int flag=0;
+            while(enviddd!=0){
+                if(enviddd==root[sem_id]){
+                    flag=1;
+                    break;
+                }
+                struct Env *t;
+                envid2env(enviddd, &t, 0);
+                enviddd=t->env_parent_id;
+            }
+            if(flag!=1){
+                return -E_NO_SEM;
+            }
+        }
+    if(value[sem_id]<0){
+        value[sem_id]++;
+        canRelease[sem_id]++;
+    }else{
+        value[sem_id]++;
+    }
+    return 0;
+}
+
+int sys_getvalue(int sem_id) {
+    if(sem_id<0||sem_id>=total){
+        return -E_NO_SEM;
+    }
+        if(perm[sem_id]!=0){
+            int enviddd=curenv->env_id;
+            int flag=0;
+            while(enviddd!=0){
+                if(enviddd==root[sem_id]){
+                    flag=1;
+                    break;
+                }
+                struct Env *t;
+                envid2env(enviddd, &t, 0);
+                enviddd=t->env_parent_id;
+            }
+            if(flag!=1){
+                return -E_NO_SEM;
+            }
+        }
+    return value[sem_id];
+}
+
+int sys_getid(const char *name) {
+    for(int i =0; i<total;i++) {
+        if(strcmp(name, nameee[i])==0){
+            int sem_id = i;
+        if(perm[sem_id]!=0){
+            int enviddd=curenv->env_id;
+            int flag=0;
+            while(enviddd!=0){
+                if(enviddd==root[sem_id]){
+                    flag=1;
+                    break;
+                }
+                struct Env *t;
+                envid2env(enviddd, &t, 0);
+                enviddd=t->env_parent_id;
+            }
+            if(flag!=1){
+                return -E_NO_SEM;
+            }
+        }
+            return i;
+        }
+    }
+    return -E_NO_SEM;
+}
+
 /* Overview:
  * 	This function is used to print a character on screen.
  *
@@ -498,6 +630,11 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+    [SYS_init] = sys_init,
+    [SYS_wait] = sys_wait,
+    [SYS_post] = sys_post,
+    [SYS_getvalue] = sys_getvalue,
+    [SYS_getid] = sys_getid,
 };
 
 /* Overview:

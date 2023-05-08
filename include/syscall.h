@@ -22,6 +22,11 @@ enum {
 	SYS_cgetc,
 	SYS_write_dev,
 	SYS_read_dev,
+    SYS_init,
+    SYS_wait,
+    SYS_post,
+    SYS_getvalue,
+    SYS_getid,
 	MAX_SYSNO,
 };
 
