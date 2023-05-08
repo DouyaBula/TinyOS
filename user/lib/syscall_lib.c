@@ -4,6 +4,14 @@
 #include <syscall.h>
 #include <trap.h>
 
+int syscall_barrier_alloc(int n) {
+    return msyscall(SYS_barrier_alloc, n);
+}
+
+int syscall_barrier_wait(int type) {
+    return msyscall(SYS_barrier_wait, type);
+}
+
 void syscall_putchar(int ch) {
 	msyscall(SYS_putchar, ch);
 }

@@ -10,6 +10,26 @@
 
 extern struct Env *curenv;
 
+int barrier = -1;
+int cnt = 0;
+int sys_barrier_alloc(int n) {
+    barrier = n;
+    return 0;
+}
+
+int sys_barrier_wait(int type) {
+    if (barrier == -1) {
+        return 0;
+    }
+    if (type == 1) {
+        cnt++;
+        if (cnt == barrier) {
+            barrier = -1;
+            return 0;
+        }
+    }
+    return -1;
+}
 /* Overview:
  * 	This function is used to print a character on screen.
  *
@@ -498,6 +518,8 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+    [SYS_barrier_alloc] = sys_barrier_alloc,
+    [SYS_barrier_wait] = sys_barrier_wait,
 };
 
 /* Overview:

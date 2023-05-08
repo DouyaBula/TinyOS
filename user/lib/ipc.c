@@ -4,6 +4,23 @@
 #include <lib.h>
 #include <mmu.h>
 
+
+void barrier_alloc(int n) {
+    syscall_barrier_alloc(n);
+}
+
+void barrier_wait() {
+    int r;
+    r = syscall_barrier_wait(1); //barrier cnt +1
+    if (r == 0) { // barrier is disabled
+        return;
+    }
+    while((r = syscall_barrier_wait(0)) == -1) { // barrier is still enabled
+        syscall_yield();
+    }
+    user_assert(r == 0);
+}
+
 // Send val to whom.  This function keeps trying until
 // it succeeds.  It should panic() on any error other than
 // -E_IPC_NOT_RECV.
