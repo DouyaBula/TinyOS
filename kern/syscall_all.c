@@ -19,10 +19,28 @@ int posB[11];
 int queue[11][100];
 int canRelease[11];
 int root[11];
-int sys_init(const char *name, int init_value, int checkperm) {
-    if(total==10){
-        return -E_NO_SEM;
+int checkPerm(int sem_id){
+    if(perm[sem_id] == 0) {
+        return 0;
     }
+    struct Env *e = curenv;
+    int id = e->env_id;
+    if(id == root[sem_id]) {
+        return 0;
+    }
+    while(1) {
+        if(id==root[sem_id]){
+            return 0;
+        }
+        id = e->env_parent_id;
+        if(id == 0){
+            break;
+        }
+        envid2env(id, &e, 0);
+    }
+    return -E_NO_SEM;
+}
+int sys_init(const char *name, int init_value, int checkperm) {
     int sem_id = total;
     root[total] = curenv->env_id;
     nameee[total] = name;
@@ -34,21 +52,9 @@ int sys_init(const char *name, int init_value, int checkperm) {
 
 int sys_wait(int sem_id, int type) {
     if(type == 1){
-        if(perm[sem_id]!=0){
-            int enviddd=curenv->env_id;
-            int flag=0;
-            while(enviddd!=0){
-                if(enviddd==root[sem_id]){
-                    flag=1;
-                    break;
-                }
-                struct Env *t;
-                envid2env(enviddd, &t, 0);
-                enviddd=t->env_parent_id;
-            }
-            if(flag!=1){
-                return -E_NO_SEM;
-            }
+        int r = checkPerm(sem_id);
+        if (r<0){
+            return r;
         }
         value[sem_id]--;
         if (value<0){
@@ -68,21 +74,9 @@ int sys_wait(int sem_id, int type) {
 }
 
 int sys_post(int sem_id) {
-        if(perm[sem_id]!=0){
-            int enviddd=curenv->env_id;
-            int flag=0;
-            while(enviddd!=0){
-                if(enviddd==root[sem_id]){
-                    flag=1;
-                    break;
-                }
-                struct Env *t;
-                envid2env(enviddd, &t, 0);
-                enviddd=t->env_parent_id;
-            }
-            if(flag!=1){
-                return -E_NO_SEM;
-            }
+        int r = checkPerm(sem_id);
+        if (r<0){
+            return r;
         }
     if(value[sem_id]<0){
         value[sem_id]++;
@@ -97,21 +91,9 @@ int sys_getvalue(int sem_id) {
     if(sem_id<0||sem_id>=total){
         return -E_NO_SEM;
     }
-        if(perm[sem_id]!=0){
-            int enviddd=curenv->env_id;
-            int flag=0;
-            while(enviddd!=0){
-                if(enviddd==root[sem_id]){
-                    flag=1;
-                    break;
-                }
-                struct Env *t;
-                envid2env(enviddd, &t, 0);
-                enviddd=t->env_parent_id;
-            }
-            if(flag!=1){
-                return -E_NO_SEM;
-            }
+        int r = checkPerm(sem_id);
+        if (r<0){
+            return r;
         }
     return value[sem_id];
 }
@@ -119,24 +101,12 @@ int sys_getvalue(int sem_id) {
 int sys_getid(const char *name) {
     for(int i =0; i<total;i++) {
         if(strcmp(name, nameee[i])==0){
-            int sem_id = i;
-        if(perm[sem_id]!=0){
-            int enviddd=curenv->env_id;
-            int flag=0;
-            while(enviddd!=0){
-                if(enviddd==root[sem_id]){
-                    flag=1;
-                    break;
-                }
-                struct Env *t;
-                envid2env(enviddd, &t, 0);
-                enviddd=t->env_parent_id;
-            }
-            if(flag!=1){
-                return -E_NO_SEM;
-            }
-        }
-            return i;
+             int sem_id = i;
+             int r = checkPerm(sem_id);
+             if (r<0){
+                 return r;
+             }
+             return i;
         }
     }
     return -E_NO_SEM;

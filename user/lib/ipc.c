@@ -15,8 +15,11 @@ int sem_wait(int sem_id) {
     if (r == -E_NO_SEM) {
         return r;
     }
+    if(r==0){
+        return 0;
+    }
     if (r == -1) {
-        while((r=msyscall(SYS_wait, sem_id, 0) == -1)){
+        while((r=msyscall(SYS_wait, sem_id, 0)) == -1){
             syscall_yield();
         }
     }
