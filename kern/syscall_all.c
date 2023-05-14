@@ -463,7 +463,7 @@ static inline int is_illegal_pa_range(u_long pa, u_int len) {
     if (len == 0) {
         return 0;
     }
-    if (len < 0) {
+    if (pa + len < len) {
         return 1;
     }
     if (!(
