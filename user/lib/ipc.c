@@ -32,7 +32,7 @@ void usleep(u_int us) {
 		if (now_s > top_s) {
 			return;
 		}
-        if ((now_s == enter_s) && (now_us >= top_us)) {
+        if ((now_s == top_s) && (now_us >= top_us)) {
             //debugf("%d -- %d\n", now_us, enter_us+us);
             return;
         }
