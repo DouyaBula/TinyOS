@@ -18,15 +18,21 @@ void usleep(u_int us) {
 	// 读取进程进入 usleep 函数的时间
     u_int enter_us = 0;
 	u_int enter_s = get_time(&enter_us);
+    u_int limit_s = us / 1000000;
+    u_int limit_us = us - limit_s;
+    u_int add_s = (enter_us + limit_us) / 1000000;
+    u_int left_us = (enter_us + limit_us) - add_s;
+    u_int top_s = enter_s + limit_s + add_s;
+    u_int top_us = left_us;
     // debugf("enter_s: %d\tenter_us: %d\n", enter_s, enter_us);
     while (1) {
 		// 读取当前时间
         u_int now_us = 0;
         u_int now_s = get_time(&now_us);
-		if (now_s > enter_s) {
+		if (now_s > top_s) {
 			return;
 		}
-        if ((now_s == enter_s) && (now_us >= enter_us + us)) {
+        if ((now_s == enter_s) && (now_us >= top_us)) {
             //debugf("%d -- %d\n", now_us, enter_us+us);
             return;
         }
