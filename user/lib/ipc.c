@@ -18,16 +18,19 @@ void usleep(u_int us) {
 	// 读取进程进入 usleep 函数的时间
     u_int enter_us = 0;
 	u_int enter_s = get_time(&enter_us);
+    // debugf("enter_s: %d\tenter_us: %d\n", enter_s, enter_us);
     while (1) {
 		// 读取当前时间
         u_int now_us = 0;
         u_int now_s = get_time(&now_us);
-		if ((now_s + now_us + us) >= (enter_s + enter_us) /* 当前时间 >= 进入时间 + us 微秒*/) {
+		if (now_s > enter_s) {
 			return;
-		} else {
-            syscall_yield();
-			// 进程切换
 		}
+        if ((now_s == enter_s) && (now_us >= enter_us + us)) {
+            //debugf("%d -- %d\n", now_us, enter_us+us);
+            return;
+        }
+        syscall_yield();
 	}
 }
 // Send val to whom.  This function keeps trying until
