@@ -1,9 +1,35 @@
 // User-level IPC library routines
 
+#include <drivers/dev_rtc.h>
 #include <env.h>
 #include <lib.h>
 #include <mmu.h>
 
+// lab5-1 exam
+u_int get_time(u_int *us) {
+    u_int temp = 0;
+    panic_on(syscall_write_dev(&temp, DEV_RTC_ADDRESS + DEV_RTC_TRIGGER_READ, sizeof(temp)));
+    panic_on(syscall_read_dev(&temp, DEV_RTC_ADDRESS + DEV_RTC_SEC, sizeof(temp)));
+    panic_on(syscall_read_dev(us, DEV_RTC_ADDRESS + DEV_RTC_USEC, sizeof(temp)));
+    return temp;
+}
+
+void usleep(u_int us) {
+	// 读取进程进入 usleep 函数的时间
+    u_int enter_us = 0;
+	u_int enter_s = get_time(&enter_us);
+    while (1) {
+		// 读取当前时间
+        u_int now_us = 0;
+        u_int now_s = get_time(&now_us);
+		if ((now_s + now_us + us) >= (enter_s + enter_us) /* 当前时间 >= 进入时间 + us 微秒*/) {
+			return;
+		} else {
+            syscall_yield();
+			// 进程切换
+		}
+	}
+}
 // Send val to whom.  This function keeps trying until
 // it succeeds.  It should panic() on any error other than
 // -E_IPC_NOT_RECV.
