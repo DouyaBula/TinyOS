@@ -137,7 +137,7 @@ int parsecmd(char **argv, int *rightpipe) {
                 close(p[1]);
                 return parsecmd(argv, rightpipe);
             } else {
-                dup(p[1], 0);
+                dup(p[1], 1);
                 close(p[1]);
                 close(p[0]);
                 return argc;
