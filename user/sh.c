@@ -88,10 +88,14 @@ int parsecmd(char **argv, int *rightpipe) {
 			}
 			// Open 't' for reading, dup it onto fd 0, and then close the original fd.
 			/* Exercise 6.5: Your code here. (1/3) */
-
+            fd = open(t, O_RDONLY);
+            if (fd < 0) {
+                user_panic("open file FAILED.\n");
+            }
+            dup(fd, 0);
+            close(fd);
+            break;
 			user_panic("< redirection not implemented");
-
-			break;
 		case '>':
 			if (gettoken(0, &t) != 'w') {
 				debugf("syntax error: > not followed by word\n");
@@ -99,10 +103,14 @@ int parsecmd(char **argv, int *rightpipe) {
 			}
 			// Open 't' for writing, dup it onto fd 1, and then close the original fd.
 			/* Exercise 6.5: Your code here. (2/3) */
-
+            fd = open(t, O_WRONLY);
+            if (fd < 0) {
+                user_panic("open file FAILED.\n");
+            }
+            dup(fd, 1);
+            close(fd);
+            break;
 			user_panic("> redirection not implemented");
-
-			break;
 		case '|':;
 			/*
 			 * First, allocate a pipe.
@@ -121,10 +129,21 @@ int parsecmd(char **argv, int *rightpipe) {
 			 */
 			int p[2];
 			/* Exercise 6.5: Your code here. (3/3) */
-
+            pipe(p);
+            *rightpipe = fork();
+            if (*rightpipe == 0) {
+                dup(p[0], 0);
+                close(p[0]);
+                close(p[1]);
+                return parsecmd(argv, rightpipe);
+            } else {
+                dup(p[1], 0);
+                close(p[1]);
+                close(p[0]);
+                return argc;
+            }
+            break;
 			user_panic("| not implemented");
-
-			break;
 		}
 	}
 
