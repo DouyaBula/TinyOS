@@ -14,6 +14,14 @@
 #define FSREQ_REMOVE 6
 #define FSREQ_SYNC 7
 
+// lab5-2 exam
+#define FSREQ_OPENAT 8
+struct Fsreq_openat {
+    u_int dir_fileid;
+   	char req_path[MAXPATHLEN];
+   	u_int req_omode;
+};
+
 struct Fsreq_open {
 	char req_path[MAXPATHLEN];
 	u_int req_omode;
