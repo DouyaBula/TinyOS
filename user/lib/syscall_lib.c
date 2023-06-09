@@ -4,6 +4,23 @@
 #include <syscall.h>
 #include <trap.h>
 
+// lab4-challenge
+int syscall_sendsig(u_int envid, int sig) {
+	return msyscall(SYS_sendsig, envid, sig);
+}
+
+int syscall_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
+	return msyscall(SYS_sigaction, signum, act, oldact);
+}
+
+int syscall_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
+	return msyscall(SYS_sigprocmask, set, oldset);
+}
+
+int syscall_set_sighand_entry(u_int envid, u_int func) {
+	return msyscall(SYS_set_sighand_entry, envid, func);
+}
+
 void syscall_putchar(int ch) {
 	msyscall(SYS_putchar, ch);
 }
@@ -67,10 +84,10 @@ int syscall_cgetc() {
 
 int syscall_write_dev(void *va, u_int dev, u_int len) {
 	/* Exercise 5.2: Your code here. (1/2) */
-    return msyscall(SYS_write_dev, va, dev, len);
+	return msyscall(SYS_write_dev, va, dev, len);
 }
 
 int syscall_read_dev(void *va, u_int dev, u_int len) {
 	/* Exercise 5.2: Your code here. (2/2) */
-    return msyscall(SYS_read_dev, va, dev, len);
+	return msyscall(SYS_read_dev, va, dev, len);
 }

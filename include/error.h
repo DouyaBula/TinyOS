@@ -3,6 +3,9 @@
 
 // OS error codes.
 
+// lab4-challenge
+#define E_SIG (1)
+
 // Unspecified or unknown problem
 #define E_UNSPECIFIED 1
 

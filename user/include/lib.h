@@ -7,6 +7,9 @@
 #include <pmap.h>
 #include <syscall.h>
 #include <trap.h>
+// lab4-challenge
+#include <signal.h>
+#include <lib_signal.h>
 
 #define vpt ((volatile Pte *)UVPT)
 #define vpd ((volatile Pde *)(UVPT + (PDX(UVPT) << PGSHIFT)))

@@ -5,6 +5,7 @@
 #include <queue.h>
 #include <trap.h>
 #include <types.h>
+#include <signal.h>
 
 #define LOG2NENV 10
 #define NENV (1 << LOG2NENV)
@@ -37,7 +38,17 @@ struct Env {
 
 	// Lab 6 scheduler counts
 	u_int env_runs; // number of times been env_run'ed
+
+	// lab4-challenge
+	u_int env_user_sighand_entry;
+	struct sighand_struct sighand; // 信号处理信息, 即64个信号的action
+	sigset_t blocked;	       // 全局掩码
+	struct Sig_pending sig_pending;
+	u_int sig_pending_cnt;
 };
+
+void sig_setuptf(struct Trapframe *tf, int signum);
+void do_signal(struct Trapframe *tf);
 
 LIST_HEAD(Env_list, Env);
 TAILQ_HEAD(Env_sched_list, Env);
