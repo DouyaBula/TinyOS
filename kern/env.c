@@ -12,6 +12,9 @@
 // Our bitmap requires this to be a multiple of 32.
 #define NASID 64
 
+// lab4-challenge
+int sigsCnt = 0;
+struct signal sigs[SIG_BUFFER] __attribute__((aligned(BY2PG)));
 struct Env envs[NENV] __attribute__((aligned(BY2PG))); // All environments
 
 struct Env *curenv = NULL;	      // the current env
@@ -517,9 +520,11 @@ void env_run(struct Env *e) {
 void do_signal(struct Trapframe *tf) {
 	struct signal *s = NULL;
 	// 检查将要运行的进程是否存在需要处理的信号, 若有, 从进程的队列中取出signal
+	int t;
 	if (curenv->sig_pending_cnt > 0) {
 		TAILQ_FOREACH (s, &curenv->sig_pending, sig_link) {
 			if (!_sigismember(&curenv->blocked, s->signum)) {
+				t = s->signum;
 				break;
 			}
 		}
@@ -527,7 +532,8 @@ void do_signal(struct Trapframe *tf) {
 	// 若取出了signal, 则修改进程的上下文, 进入用户态的handle_signal处理信号
 	if (s) {
 		curenv->sig_pending_cnt--;
-		sig_setuptf(tf, s->signum);
+		TAILQ_REMOVE(&curenv->sig_pending, s, sig_link);
+		sig_setuptf(tf, t);
 	}
 }
 

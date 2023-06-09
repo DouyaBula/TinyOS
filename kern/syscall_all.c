@@ -8,8 +8,8 @@
 #include <printk.h>
 #include <queue.h>
 #include <sched.h>
-#include <syscall.h>
 #include <signal.h>
+#include <syscall.h>
 
 extern struct Env *curenv;
 
@@ -79,13 +79,16 @@ int sys_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
 // 向进程控制号编号为 envid 的进程发送 sig 信号，
 // 注意当 envid = 0 时代表向自身发送信号。
 // 该函数成功完成返回 0，如果信号编号超过限制或者进程编号不存在则返回 -1。
+extern int sigsCnt;
+extern struct signal sigs[];
 int sys_sendsig(u_int envid, int sig) {
 	struct Env *e;
 	if (sig < 1 || sig > SIG_MAX || envid2env(envid, &e, 1) != 0) {
 		return -E_SIG;
 	};
-	struct signal s = {.signum = sig};
-	TAILQ_INSERT_TAIL(&e->sig_pending, &s, sig_link);
+	sigs[sigsCnt].signum = sig;
+	TAILQ_INSERT_TAIL(&e->sig_pending, &sigs[sigsCnt], sig_link);
+	sigsCnt = (sigsCnt + 1) % SIG_BUFFER;
 	e->sig_pending_cnt++;
 	return 0;
 }
@@ -610,7 +613,7 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_sigaction] = sys_sigaction,
     [SYS_sigprocmask] = sys_sigprocmask,
     [SYS_sendsig] = sys_sendsig,
-	[SYS_set_sighand_entry] = sys_set_sighand_entry,
+    [SYS_set_sighand_entry] = sys_set_sighand_entry,
 };
 
 /* Overview:

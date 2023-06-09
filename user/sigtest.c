@@ -17,11 +17,18 @@ int main(int argc, char **argv) {
     sigaddset(&set, TEST_NUM);
     panic_on(sigprocmask(0, &set, NULL));
     kill(0, TEST_NUM);
+    kill(0, 3);
+    kill(0, 4);
+    kill(0, 5);
     int ans = 0;
     for (int i = 0; i < 10000000; i++) {
         ans += i;
     }
     panic_on(sigprocmask(1, &set, NULL));
+    ans = 0;
+    for (int i = 0; i < 10000000; i++) {
+        ans += i;
+    }
     debugf("global = %d.\n", global);
     return 0;
 }

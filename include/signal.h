@@ -18,6 +18,7 @@
 #define SIG_MAX (64)
 #define SIG_B2W (8 * sizeof(int))
 #define SIG_WORDS (SIG_MAX / SIG_B2W)
+#define SIG_BUFFER (64)
 
 // 掩码结构体
 typedef struct sigset_t {
