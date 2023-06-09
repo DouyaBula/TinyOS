@@ -21,5 +21,6 @@ int syscall_sigaction(int signum, const struct sigaction *act, struct sigaction 
 int syscall_sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
 int syscall_sendsig(u_int envid, int sig);
 int syscall_set_sighand_entry(u_int envid, u_int func);
+int syscall_set_sig_is_handling(u_int envid, int is_handling);
 
 #endif

@@ -100,6 +100,13 @@ int sys_set_sighand_entry(u_int envid, u_int func) {
 	return 0;
 }
 
+int sys_set_sig_is_handling(u_int envid, int is_handling) {
+	struct Env *env;
+	try(envid2env(envid, &env, 1));
+	env->sig_is_handling = is_handling;
+	return 0;
+}
+
 /* Overview:
  * 	This function is used to print a character on screen.
  *
@@ -614,6 +621,7 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_sigprocmask] = sys_sigprocmask,
     [SYS_sendsig] = sys_sendsig,
     [SYS_set_sighand_entry] = sys_set_sighand_entry,
+	[SYS_set_sig_is_handling] = sys_set_sig_is_handling,
 };
 
 /* Overview:

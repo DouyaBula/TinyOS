@@ -289,6 +289,7 @@ int env_alloc(struct Env **new, u_int parent_id) {
 	e->blocked = init_sigset;
 	TAILQ_INIT(&e->sig_pending);
 	e->sig_pending_cnt = 0;
+	e->sig_is_handling = 0;
 	/* Step 5: Remove the new Env from env_free_list. */
 	/* Exercise 3.4: Your code here. (4/4) */
 	LIST_REMOVE(e, env_link);
@@ -512,21 +513,22 @@ void env_run(struct Env *e) {
 	/* Exercise 3.8: Your code here. (2/2) */
 
 	// lab4-1 challenge
-	do_signal(&curenv->env_tf);
+	if(!e->sig_is_handling && curenv->sig_pending_cnt){
+		e->sig_is_handling = 1;
+		do_signal(&curenv->env_tf);
+	}
 	env_pop_tf(&curenv->env_tf, curenv->env_asid);
 }
 
 // lab4-challenge
 void do_signal(struct Trapframe *tf) {
 	struct signal *s = NULL;
-	// 检查将要运行的进程是否存在需要处理的信号, 若有, 从进程的队列中取出signal
+	// 从进程的队列中取出signal
 	int t;
-	if (curenv->sig_pending_cnt > 0) {
-		TAILQ_FOREACH (s, &curenv->sig_pending, sig_link) {
-			if (!_sigismember(&curenv->blocked, s->signum)) {
-				t = s->signum;
-				break;
-			}
+	TAILQ_FOREACH (s, &curenv->sig_pending, sig_link) {
+		if (!_sigismember(&curenv->blocked, s->signum)) {
+			t = s->signum;
+			break;
 		}
 	}
 	// 若取出了signal, 则修改进程的上下文, 进入用户态的handle_signal处理信号

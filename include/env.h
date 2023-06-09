@@ -40,11 +40,12 @@ struct Env {
 	u_int env_runs; // number of times been env_run'ed
 
 	// lab4-challenge
-	u_int env_user_sighand_entry;
+	u_int env_user_sighand_entry;	// 用户态信号处理函数入口
 	struct sighand_struct sighand; // 信号处理信息, 即64个信号的action
 	sigset_t blocked;	       // 全局掩码
-	struct Sig_pending sig_pending;
-	u_int sig_pending_cnt;
+	struct Sig_pending sig_pending;	// 未处理信号队列
+	u_int sig_pending_cnt;	// 未处理信号的数量
+	u_int sig_is_handling; // 是否正在处理信号
 };
 
 void sig_setuptf(struct Trapframe *tf, int signum);

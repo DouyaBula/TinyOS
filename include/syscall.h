@@ -26,6 +26,7 @@ enum {
 	SYS_sigprocmask,
 	SYS_sendsig,
 	SYS_set_sighand_entry,
+	SYS_set_sig_is_handling,
 	MAX_SYSNO,
 };
 

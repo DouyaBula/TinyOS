@@ -11,6 +11,7 @@ static void __attribute__((noreturn)) sighand_entry(struct Trapframe *tf, int si
 	} else {
 		debugf("%d is ignored.\n", signum);
 	}
+	try(syscall_set_sig_is_handling(0, 0));
 	int r = syscall_set_trapframe(0, tf);
 	user_panic("sighand_entry returned %d", r);
 }

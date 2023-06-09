@@ -21,6 +21,10 @@ int syscall_set_sighand_entry(u_int envid, u_int func) {
 	return msyscall(SYS_set_sighand_entry, envid, func);
 }
 
+int syscall_set_sig_is_handling(u_int envid, int is_handling) {
+	return msyscall(SYS_set_sig_is_handling, envid, is_handling);
+}
+
 void syscall_putchar(int ch) {
 	msyscall(SYS_putchar, ch);
 }
