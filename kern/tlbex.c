@@ -6,11 +6,10 @@ static void passive_alloc(u_int va, Pde *pgdir, u_int asid) {
 	struct Page *p = NULL;
 
 	if (va < UTEMP) {
-		// panic("address too low");
-		// lab4-challenge
-	
+		panic("address too low");
 	}
 
+	// lab4-challenge: 可以注释掉这里以扩充异常栈
 	if (va >= USTACKTOP && va < USTACKTOP + BY2PG) {
 		panic("invalid memory");
 	}
@@ -34,8 +33,30 @@ static void passive_alloc(u_int va, Pde *pgdir, u_int asid) {
 /* Overview:
  *  Refill TLB.
  */
-Pte _do_tlb_refill(u_long va, u_int asid) {
+Pte _do_tlb_refill(u_long va, u_int asid, struct Trapframe *tf) {
 	Pte *pte;
+	// SIGSEGV 抢占式处理
+	if (va < UTEMP) {
+		printk("kernel: SIGSEGV triggered!\n");
+		if (!curenv->env_user_sighand_entry) {
+			env_destroy(curenv);
+		}
+		struct Trapframe tmp_tf = *tf;
+		if (tf->regs[29] < USTACKTOP || tf->regs[29] >= UXSTACKTOP) {
+			tf->regs[29] = UXSTACKTOP;
+		}
+		tf->regs[29] -= sizeof(struct Trapframe);
+		*(struct Trapframe *)tf->regs[29] = tmp_tf;
+		
+		tf->regs[4] = tf->regs[29];
+		tf->regs[5] = SIGSEGV;
+		tf->regs[6] = curenv->sighand.action[SIGSEGV - 1].sa_handler;
+		tf->regs[29] -= 3 * sizeof(tf->regs[4]);
+		tf->cp0_epc = curenv->env_user_sighand_entry;
+		env_pop_tf(tf, curenv->env_asid);
+		panic("SIGSEGV returned!\n");
+	}
+
 	/* Hints:
 	 *  Invoke 'page_lookup' repeatedly in a loop to find the page table entry 'pte' associated
 	 *  with the virtual address 'va' in the current address space 'cur_pgdir'.
@@ -45,15 +66,15 @@ Pte _do_tlb_refill(u_long va, u_int asid) {
 	 */
 
 	/* Exercise 2.9: Your code here. */
-    struct Page *pp = NULL;
-    while (1) {
-        pp = page_lookup(cur_pgdir, va, &pte);
-        if (pp == NULL) {
-            passive_alloc(va, cur_pgdir, asid);
-        } else {
-            break;
-        }
-    }
+	struct Page *pp = NULL;
+	while (1) {
+		pp = page_lookup(cur_pgdir, va, &pte);
+		if (pp == NULL) {
+			passive_alloc(va, cur_pgdir, asid);
+		} else {
+			break;
+		}
+	}
 	return *pte;
 }
 
@@ -83,7 +104,7 @@ void do_tlb_mod(struct Trapframe *tf) {
 		tf->regs[29] -= sizeof(tf->regs[4]);
 		// Hint: Set 'cp0_epc' in the context 'tf' to 'curenv->env_user_tlb_mod_entry'.
 		/* Exercise 4.11: Your code here. */
-        tf->cp0_epc = curenv->env_user_tlb_mod_entry;
+		tf->cp0_epc = curenv->env_user_tlb_mod_entry;
 	} else {
 		panic("TLB Mod but no user handler registered");
 	}

@@ -11,11 +11,34 @@ void handler2(int num) {
 	global = 2;
 }
 
+int a[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+int *test = NULL;
+void sgv_handler(int num) {
+    debugf("Segment fault appear!\n");
+    test = &a[0];
+    debugf("test = %d.\n", *test);
+    // exit();
+}
+
 int main(int argc, char **argv) {
-	multiSigTest();
-    // _debug();
+	sigsegvTest();
 	return 0;
 }
+
+void sigsegvTest() {
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGSEGV);
+    struct sigaction sig;
+    sig.sa_handler = sgv_handler;
+    sig.sa_mask = set;
+    debugf("user-handler: %x\n", sig.sa_handler);
+    panic_on(sigaction(11, &sig, NULL));
+    *test = 10;
+    debugf("test = %d.\n", *test);
+    return 0;
+}
+
 
 #define TEST_NUM 2
 #define TEST_NUM2 3
@@ -27,6 +50,7 @@ void _debug() {
     int boolean = sigismember(&set, TEST_NUM);
 	panic_on(sigprocmask(0, &set, &oldset));
 }
+
 
 void multiSigTest() {
 	sigset_t set;
@@ -58,7 +82,3 @@ void multiSigTest() {
 	debugf("global = %d.\n", global);
 }
 
-void sigsegvTest() {
-	char *low = 0x3F0000;
-	*low = 'a';
-}

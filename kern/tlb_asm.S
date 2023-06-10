@@ -32,6 +32,7 @@ tlb_refill_ra:
 .word 0
 .text
 NESTED(do_tlb_refill, 0, zero)
+	move 	a2, a0		# lab4-challenge: we need to modify trapframe
 	mfc0    a0, CP0_BADVADDR
 	mfc0    a1, CP0_ENTRYHI
 	srl     a1, a1, 6
