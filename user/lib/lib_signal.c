@@ -19,7 +19,7 @@ void print_sig_info(int signum) {
 }
 
 // 执行信号
-static void __attribute__((noreturn))
+void __attribute__((noreturn))
 sighand_entry(struct Trapframe *tf, int signum, sa_handler handler) {
 	// 如果产生了SIGSEGV但是进程使用掩码忽略, 那么直接panic.
 	if (signum == SIGSEGV && sigismember(&env->blocked, signum)) {
@@ -44,7 +44,7 @@ sighand_entry(struct Trapframe *tf, int signum, sa_handler handler) {
 		user_panic("SIGSEGV needs to be handled!\n");
 	}
 
-	try(syscall_set_sig_is_handling(0, 0));
+	panic_on(syscall_set_sig_is_handling(0, 0));
 	int r = syscall_set_trapframe(0, tf);
 	user_panic("sighand_entry returned %d", r);
 }
@@ -57,25 +57,25 @@ int kill(u_int envid, int sig) {
 	}
 
 	extern volatile struct Env *env;
-	if (env->env_user_tlb_mod_entry != (u_int)sighand_entry) {
-		try(syscall_set_sighand_entry(0, sighand_entry));
+	if (env->env_user_sighand_entry != (u_int)sighand_entry) {
+		try(syscall_set_sighand_entry(0, (u_int)sighand_entry));
 	}
-	try(syscall_set_sighand_entry(envid, sighand_entry));
+	try(syscall_set_sighand_entry(envid, (u_int)sighand_entry));
 	return syscall_sendsig(envid, sig);
 }
 
 // 注册信号的处理函数
 int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
-	if (env->env_user_tlb_mod_entry != (u_int)sighand_entry) {
-		try(syscall_set_sighand_entry(0, sighand_entry));
+	if (env->env_user_sighand_entry != (u_int)sighand_entry) {
+		try(syscall_set_sighand_entry(0, (u_int)sighand_entry));
 	}
 	return syscall_sigaction(signum, act, oldact);
 }
 
 // 修改进程的信号掩码
 int sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
-	if (env->env_user_tlb_mod_entry != (u_int)sighand_entry) {
-		try(syscall_set_sighand_entry(0, sighand_entry));
+	if (env->env_user_sighand_entry != (u_int)sighand_entry) {
+		try(syscall_set_sighand_entry(0, (u_int)sighand_entry));
 	}
 	return syscall_sigprocmask(how, set, oldset);
 }

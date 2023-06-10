@@ -115,6 +115,11 @@ int fork(void) {
 		try(syscall_set_tlb_mod_entry(0, cow_entry));
 	}
 
+	// lab4-challenge
+	if (env->env_user_sighand_entry != (u_int)sighand_entry) {
+		try(syscall_set_sighand_entry(0, (u_int)sighand_entry));
+	}
+
 	/* Step 2: Create a child env that's not ready to be scheduled. */
 	// Hint: 'env' should always point to the current env itself, so we should fix it to the
 	// correct value.

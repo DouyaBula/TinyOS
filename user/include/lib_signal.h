@@ -23,4 +23,7 @@ int syscall_sendsig(u_int envid, int sig);
 int syscall_set_sighand_entry(u_int envid, u_int func);
 int syscall_set_sig_is_handling(u_int envid, int is_handling);
 
+void __attribute__((noreturn))
+sighand_entry(struct Trapframe *tf, int signum, sa_handler handler);
+
 #endif

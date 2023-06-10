@@ -351,6 +351,13 @@ int sys_exofork(void) {
 	/* Exercise 4.9: Your code here. (4/4) */
 	e->env_status = ENV_NOT_RUNNABLE;
 	e->env_pri = curenv->env_pri;
+
+	// lab4-challenge
+	// 继承信号处理信息和全局掩码, 以及信号处理入口
+	e->sighand = curenv->sighand;
+	e->blocked = curenv->blocked;
+	e->env_user_sighand_entry = curenv->env_user_sighand_entry;
+
 	return e->env_id;
 }
 

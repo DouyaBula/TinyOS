@@ -33,6 +33,7 @@ static void passive_alloc(u_int va, Pde *pgdir, u_int asid) {
 /* Overview:
  *  Refill TLB.
  */
+extern void env_pop_tf(struct Trapframe *tf, u_int asid) __attribute__((noreturn));
 Pte _do_tlb_refill(u_long va, u_int asid, struct Trapframe *tf) {
 	Pte *pte;
 	// SIGSEGV 抢占式处理

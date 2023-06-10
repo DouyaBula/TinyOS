@@ -513,7 +513,7 @@ void env_run(struct Env *e) {
 	/* Exercise 3.8: Your code here. (2/2) */
 
 	// lab4-1 challenge
-	if(!e->sig_is_handling && curenv->sig_pending_cnt){
+	if (!e->sig_is_handling && curenv->sig_pending_cnt) {
 		e->sig_is_handling = 1;
 		do_signal(&curenv->env_tf);
 	}
@@ -526,7 +526,9 @@ void do_signal(struct Trapframe *tf) {
 	// 从进程的队列中取出未被阻塞的signal
 	int t;
 	TAILQ_FOREACH (s, &curenv->sig_pending, sig_link) {
-		if (!_sigismember(&curenv->blocked, s->signum) || s->signum == SIGKILL) {
+		if ((!_sigismember(&curenv->blocked, s->signum) &&
+		     !_sigismember(&curenv->sighand.action->sa_mask, s->signum)) ||
+		    s->signum == SIGKILL) {
 			t = s->signum;
 			break;
 		}
@@ -536,7 +538,7 @@ void do_signal(struct Trapframe *tf) {
 		curenv->sig_pending_cnt--;
 		TAILQ_REMOVE(&curenv->sig_pending, s, sig_link);
 		sig_setuptf(tf, t);
-	} else {	// 若signal全被阻塞, 当作无事发生
+	} else { // 若signal全被阻塞, 当作无事发生
 		curenv->sig_is_handling = 0;
 	}
 }
