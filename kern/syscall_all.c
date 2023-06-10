@@ -621,7 +621,7 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_sigprocmask] = sys_sigprocmask,
     [SYS_sendsig] = sys_sendsig,
     [SYS_set_sighand_entry] = sys_set_sighand_entry,
-	[SYS_set_sig_is_handling] = sys_set_sig_is_handling,
+    [SYS_set_sig_is_handling] = sys_set_sig_is_handling,
 };
 
 /* Overview:

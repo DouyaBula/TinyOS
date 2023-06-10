@@ -48,6 +48,7 @@ struct Env {
 	u_int sig_is_handling; // 是否正在处理信号
 };
 
+// lab4-challenge
 void sig_setuptf(struct Trapframe *tf, int signum);
 void do_signal(struct Trapframe *tf);
 

@@ -14,7 +14,8 @@ int syscall_sigaction(int signum, const struct sigaction *act, struct sigaction 
 }
 
 int syscall_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
-	return msyscall(SYS_sigprocmask, set, oldset);
+	return msyscall(SYS_sigprocmask, how, set, oldset);
+	// 漏写一个how, de了一个多小时, 难绷.
 }
 
 int syscall_set_sighand_entry(u_int envid, u_int func) {

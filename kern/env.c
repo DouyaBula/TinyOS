@@ -523,19 +523,21 @@ void env_run(struct Env *e) {
 // lab4-challenge
 void do_signal(struct Trapframe *tf) {
 	struct signal *s = NULL;
-	// 从进程的队列中取出signal
+	// 从进程的队列中取出未被阻塞的signal
 	int t;
 	TAILQ_FOREACH (s, &curenv->sig_pending, sig_link) {
-		if (!_sigismember(&curenv->blocked, s->signum)) {
+		if (!_sigismember(&curenv->blocked, s->signum) || s->signum == SIGKILL) {
 			t = s->signum;
 			break;
 		}
 	}
-	// 若取出了signal, 则修改进程的上下文, 进入用户态的handle_signal处理信号
+	// 若存在未被阻塞的signal, 则修改进程的上下文, 进入用户态的handle_signal处理信号
 	if (s) {
 		curenv->sig_pending_cnt--;
 		TAILQ_REMOVE(&curenv->sig_pending, s, sig_link);
 		sig_setuptf(tf, t);
+	} else {	// 若signal全被阻塞, 当作无事发生
+		curenv->sig_is_handling = 0;
 	}
 }
 

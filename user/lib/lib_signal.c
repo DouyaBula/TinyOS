@@ -1,7 +1,28 @@
 #include <lib.h>
+
+// 输出信号信息
+void print_sig_info(int signum) {
+	debugf("🔴received special signal: ");
+	switch (signum) {
+	case SIGKILL:
+		debugf("SIGKILL.\n");
+		break;
+	case SIGSEGV:
+		debugf("SIGSEGV.\n");
+		break;
+	case SIGTERM:
+		debugf("SIGTERM.\n");
+		break;
+	default:
+		break;
+	}
+}
+
 // 执行信号
-static void __attribute__((noreturn)) sighand_entry(struct Trapframe *tf, int signum, sa_handler handler) {
+static void __attribute__((noreturn))
+sighand_entry(struct Trapframe *tf, int signum, sa_handler handler) {
 	if (signum == SIGKILL || signum == SIGSEGV || signum == SIGTERM) {
+		print_sig_info(signum);
 		if (!handler) {
 			exit();
 		}
@@ -9,7 +30,7 @@ static void __attribute__((noreturn)) sighand_entry(struct Trapframe *tf, int si
 	if (handler) {
 		handler(signum);
 	} else {
-		debugf("%d is ignored.\n", signum);
+		debugf("signum %d is ignored.\n", signum);
 	}
 	try(syscall_set_sig_is_handling(0, 0));
 	int r = syscall_set_trapframe(0, tf);
