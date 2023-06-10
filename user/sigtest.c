@@ -21,12 +21,11 @@ int main(int argc, char **argv) {
 #define TEST_NUM2 3
 void _debug() {
     sigset_t set;
+    sigset_t oldset;
     sigemptyset(&set);
     sigaddset(&set, TEST_NUM);
     int boolean = sigismember(&set, TEST_NUM);
-    debugf("TEST_NUM is in set: %d\n", boolean);
-	panic_on(sigprocmask(0, &set, NULL));
-    debugf("TEST_NUM is in set: %d\n", boolean);
+	panic_on(sigprocmask(0, &set, &oldset));
 }
 
 void multiSigTest() {
@@ -46,7 +45,7 @@ void multiSigTest() {
 	kill(0, TEST_NUM);
 	kill(0, TEST_NUM2);
     panic_on(sigprocmask(1, &set, NULL));
-	kill(0, SIGTERM);
+	kill(0, SIGKILL);
 	kill(0, 5);
 	int ans = 0;
 	for (int i = 0; i < 10000000; i++) {

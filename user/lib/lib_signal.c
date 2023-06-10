@@ -39,6 +39,11 @@ sighand_entry(struct Trapframe *tf, int signum, sa_handler handler) {
 
 // 发送信号
 int kill(u_int envid, int sig) {
+	if (sig == SIGKILL || sig == SIGSEGV){
+		debugf("ONLY OS can send SIGKILL or SIGSEGV signal.\n");
+		return 0;
+	}
+
 	extern volatile struct Env *env;
 	if (env->env_user_tlb_mod_entry != (u_int)sighand_entry) {
 		try(syscall_set_sighand_entry(0, sighand_entry));

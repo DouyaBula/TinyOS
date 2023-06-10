@@ -10,10 +10,16 @@ int syscall_sendsig(u_int envid, int sig) {
 }
 
 int syscall_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
+	if (oldact) {
+		memset(oldact, 0, sizeof(oldact));
+	}
 	return msyscall(SYS_sigaction, signum, act, oldact);
 }
 
 int syscall_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
+	if (oldset) {
+		memset(oldset, 0, sizeof(oldset));
+	}
 	return msyscall(SYS_sigprocmask, how, set, oldset);
 	// 漏写一个how, de了一个多小时, 难绷.
 }
