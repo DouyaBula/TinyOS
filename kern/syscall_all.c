@@ -87,7 +87,7 @@ int sys_sendsig(u_int envid, int sig) {
 		return -E_SIG;
 	};
 	sigs[sigsCnt].signum = sig;
-	TAILQ_INSERT_TAIL(&e->sig_pending, &sigs[sigsCnt], sig_link);
+	TAILQ_INSERT_HEAD(&e->sig_pending, &sigs[sigsCnt], sig_link);
 	sigsCnt = (sigsCnt + 1) % SIG_BUFFER;
 	e->sig_pending_cnt++;
 	return 0;
